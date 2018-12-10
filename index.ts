@@ -1,140 +1,6 @@
-class Character {
-    hp: number;
-    atkSpeed: number;
-    atkPower: number;
-    atkCooldown: number;
-    atkReady: boolean;
-    alive: boolean;
-    constructor(hp: number, atkSpeed: number, atkPower: number) {
-        this.hp = hp;
-        this.atkSpeed = atkSpeed;
-        this.atkPower = atkPower;
-        this.atkCooldown = this.atkSpeed;
-        this.atkReady = false;
-        this.alive = true;
-    }
-    preciseSub(a: number, b: number): number {
-        return parseFloat((a-b).toFixed(2))
-    }
-    attack(target: Character) {
-        if (this.atkReady && this.alive) {
-            target.getHit(this.atkPower); 
-            this.atkReady = false
-            this.atkCooldown = this.atkSpeed
-        }
-    }
-    getHit(power: number) {
-        this.hp -= power;
-        this.alive = this.hp > 0;
-    }
-    wait(time: number) {
-        this.atkCooldown = this.preciseSub(this.atkCooldown, time);
-        this.atkReady = this.atkCooldown <= 0;
-    }
-}
-
-class Warrior extends Character {
-    defence: number;
-    constructor(hp: number, atkSpeed: number, atkPower: number, defence: number) {
-        super(hp, atkSpeed, atkPower);
-        this.defence = defence;
-    }
-    getHit(power: number) {
-        this.hp -= power * (1 - this.defence);
-        this.alive = this.hp > 0;
-    }
-}
-
-class Mage extends Character {
-    fireBallSpeed: number;
-    fireBallPower: number;
-    fireBallCooldown: number;
-    fireballReady: boolean;
-    constructor(hp: number, atkSpeed: number, atkPower: number, fireBallSpeed: number, fireBallPower: number) {
-        super(hp, atkSpeed, atkPower);
-        this.fireBallSpeed = fireBallSpeed;
-        this.fireBallPower = fireBallPower;
-        this.fireBallCooldown = fireBallSpeed;
-        this.fireballReady = false;
-    }
-    attack(target: Character) {
-        if (this.fireballReady &&this.alive) {
-            target.getHit(this.fireBallPower);
-            this.fireballReady = false;
-            this.fireBallCooldown = this.fireBallSpeed;
-            this.atkCooldown = this.atkSpeed;
-            this.atkReady = false;
-        }
-        else {
-            super.attack(target);
-        }
-    }
-    wait(time: number) {
-        super.wait(time);
-        this.fireBallCooldown = this.preciseSub(this.fireBallCooldown, time);
-        this.fireballReady = this.fireBallCooldown <= 0;
-    }
-}
-
-class Summoner extends Character {
-    zombieSpeed: number;
-    zombieMaxHp: number;
-    zombieAtkPower: number;
-    zombieAtkSpeed: number;
-    zombieCooldown: number;
-    zombieAtkCooldown: number;
-    zombieHp: number;
-    zombieReady: boolean;
-    zombieAtkReady: boolean;
-    zombieAlive: boolean;
-    
-    constructor(hp: number, atkSpeed: number, atkPower: number, zombieSpeed: number, zombieMaxHp: number, zombieAtkPower: number, zombieAtkSpeed: number) {
-        super(hp, atkSpeed, atkPower);
-        this.zombieSpeed = zombieSpeed;
-        this.zombieMaxHp = zombieMaxHp;
-        this.zombieAtkPower = zombieAtkPower;
-        this.zombieAtkSpeed = zombieAtkSpeed;
-        this.zombieCooldown = zombieSpeed;
-        this.zombieAtkCooldown = zombieAtkSpeed;
-        this.zombieReady = false;
-        this.zombieAlive = false;
-        this.zombieHp = 0;
-    }
-    attack(target: Character) {
-        if (this.zombieReady &&this.alive) {
-            this.zombieCooldown = this.zombieSpeed;
-            this.zombieHp = this.zombieMaxHp
-            this.zombieAtkCooldown = this.zombieAtkSpeed
-            this.zombieAlive = true
-            this.zombieAtkReady = false
-            this.zombieReady = false
-            this.atkCooldown = this.atkSpeed;
-            this.atkReady = false;
-        }
-        else {
-            super.attack(target);
-            if (this.zombieAlive && this.zombieAtkReady) {
-                target.getHit(this.zombieAtkPower);
-            }
-        }
-    }
-    getHit(power: number) {
-        if (this.zombieAlive) {
-            this.zombieHp -= power;
-            this.zombieAlive = this.zombieHp > 0;
-        }
-        else {
-            super.getHit(power)
-        }
-    }
-    wait(time: number) {
-        super.wait(time);
-        this.zombieCooldown = this.preciseSub(this.zombieCooldown, time);
-        this.zombieAtkCooldown = this.preciseSub(this.zombieAtkCooldown, time);
-        this.zombieReady = this.zombieCooldown <= 0 && ! this.zombieAlive
-        this.zombieAtkReady = this.zombieAtkCooldown <= 0 && this.zombieAlive
-    }
-}
+import Warrior from './Warrior';
+import Mage from './Mage';
+import Summoner from './Summoner';
 
 const defence: number = 0.5;
 const fireBallSpeed: number = 2;
@@ -169,5 +35,18 @@ const fight = (defence, fireBallSpeed, zombieAtkPower, zombieSpeed, p1Class, p2C
         p2.attack(p1);
         time += tick;
     }
+    return {
+        player1: {
+            hp: p1.hp,
+            alive: p1.alive
+        },
+        player2: {
+            hp: p2.hp,
+            alive: p2.hp
+        },
+        time
+    }
 
 }
+
+fight(defence, fireBallSpeed, zombieAtkPower, zombieSpeed, 'warrior', 'summoner');
